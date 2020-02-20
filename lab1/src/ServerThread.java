@@ -35,10 +35,10 @@ public class ServerThread {
         String response = "-1";
 
         logRequest(args);
-        if(args[0].equalsIgnoreCase("REGISTER"))
+        /*if(args[0].equalsIgnoreCase("REGISTER"))
             response = registerAddress(args[1],args[2]);
         else if(args[0].equalsIgnoreCase("LOOKUP"))
-            response = lookupAddress(args[1]);
+            response = lookupAddress(args[1]);*/
 
         return response;
     }
