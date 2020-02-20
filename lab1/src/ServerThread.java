@@ -17,7 +17,7 @@ public class ServerThread {
     void start() throws IOException {
         byte[] data = new byte[256];
         DatagramPacket packet;
-        while(1) {
+        while(true) {
             packet = new DatagramPacket(data,data.length);
             socket.receive(packet);
             data = processPacket(packet).getBytes();
@@ -51,10 +51,11 @@ public class ServerThread {
         System.out.print("\n");
     }
 
+    /*
     private String registerAddress(String arg, String arg1) {
-        InetAddress addr
+
     }
 
     private String lookupAddress(String arg) {
-    }
+    }*/
 }
