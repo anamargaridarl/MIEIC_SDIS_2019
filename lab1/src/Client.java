@@ -38,7 +38,7 @@ public class Client {
             for(String r: result) {
                 System.out.print(" " + r);
             }
-            
+
             System.out.print("\n");
 
     }
