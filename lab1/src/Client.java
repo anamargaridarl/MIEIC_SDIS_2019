@@ -9,10 +9,6 @@ import java.util.List;
 public class Client {
     private static int port;
     private static InetAddress host;
-
-
-
-
     private static DatagramSocket socket = null;
     private static DatagramPacket packet;
     private static byte[] buf;
@@ -26,8 +22,9 @@ public class Client {
 
         List<String> operands = Arrays.asList(args[3].split(","));
         sendRequest(args[2],operands);
-        processReply(args);
+        processReply(args[2],operands);
     }
+
 
     private static void processRequest(String operation, List<String> operands) {
 
@@ -49,17 +46,20 @@ public class Client {
         socket.send(packet);
     }
 
-    private static void processReply(String[] operands) throws IOException {
+    private static void processReply(String arg, List<String> operands) throws IOException {
 
         buf =  new byte[256];
+
         socket.receive(packet);
+        System.out.print("Received "+ packet);
         buf = packet.getData();
 
         String[] result = new String(buf,buf.length).split(" ");
-        System.out.print("Client: " );
+        System.out.print("Client: " + arg );
 
-        for(int i = 2; i < operands.length; i++) {
-            System.out.print(" " + operands[i]);
+        for(String op: operands)
+        {
+            System.out.print(" " +op);
         }
 
         System.out.print(":" );

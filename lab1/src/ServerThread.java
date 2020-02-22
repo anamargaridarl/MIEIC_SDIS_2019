@@ -20,20 +20,21 @@ public class ServerThread {
     }
 
     void start() throws IOException {
-        byte[] request = new byte[256];
+        byte[] request;
         byte[] response;
 
         while(true) {
-            packet_req = new DatagramPacket(request,request.length);
+            request = new byte[256];
+            packet_req = new DatagramPacket(request, request.length);
             socket.receive(packet_req);
             response = processPacket(packet_req).getBytes();
             reply(response);
-
         }
+
     }
 
     private void reply(byte[] response) throws IOException {
-        packet_res = new DatagramPacket(response,response.length, InetAddress.getLocalHost(),serverPort);
+        packet_res = new DatagramPacket(response,response.length,InetAddress.getByName("localhost"),serverPort);
         socket.send(packet_res);
     }
 
