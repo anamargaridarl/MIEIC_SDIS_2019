@@ -2,30 +2,39 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.lang.String;
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ServerThread {
     DatagramSocket socket;
     Map<String,String> dns_db;
+    DatagramPacket packet_res;
+    DatagramPacket packet_req;
+    int serverPort;
+
     ServerThread(String port) throws IOException {
-        socket = new DatagramSocket(Integer.parseInt(port));
+        serverPort = Integer.parseInt(port);
+        socket = new DatagramSocket(serverPort);
         dns_db = new HashMap<String, String>();
     }
 
     void start() throws IOException {
-        byte[] data = new byte[256];
-        DatagramPacket packet;
+        byte[] request = new byte[256];
+        byte[] response;
+
         while(true) {
-            packet = new DatagramPacket(data,data.length);
-            socket.receive(packet);
-            data =  processPacket(packet).getBytes();
-            reply(packet,data);
+            packet_req = new DatagramPacket(request,request.length);
+            socket.receive(packet_req);
+            response = processPacket(packet_req).getBytes();
+            reply(response);
 
         }
     }
 
-    private void reply(DatagramPacket packet, byte[] data) {
+    private void reply(byte[] response) throws IOException {
+        packet_res = new DatagramPacket(response,response.length, InetAddress.getLocalHost(),serverPort);
+        socket.send(packet_res);
     }
 
     private String processPacket(DatagramPacket packet) {
@@ -56,7 +65,7 @@ public class ServerThread {
     }
 
     private void logRequest(String[] args) {
-        System.out.print("Server: " + args[0].toLowerCase());
+        System.out.print("Server:");
         for(String arg: args) {
             System.out.print(" " + arg);
         }

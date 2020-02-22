@@ -25,26 +25,26 @@ public class Client {
         socket = new DatagramSocket();
 
         List<String> operands = Arrays.asList(args[3].split(","));
-        sendRequest(operands);
+        sendRequest(args[2],operands);
         processReply(args);
     }
 
-    private static void processRequest(List<String> operands) {
+    private static void processRequest(String operation, List<String> operands) {
 
-        String aux = "";
+        String aux = operation;
 
         for(String operand: operands)
         {
-            aux += operand;
+            aux += " " + operand;
         }
 
         buf = aux.getBytes();
         
     }
 
-    private static void sendRequest(List<String> operands) throws IOException {
+    private static void sendRequest(String operation, List<String> operands) throws IOException {
 
-        processRequest(operands);
+        processRequest(operation,operands);
         packet = new DatagramPacket(buf, buf.length, host, port);
         socket.send(packet);
     }
