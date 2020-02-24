@@ -11,11 +11,12 @@ public class Client {
     private static int port;
     private static InetAddress host;
     private static DatagramSocket socket = null;
-    private static DatagramPacket packet;
+    private static DatagramPacket packet_req;
+    private static DatagramPacket packet_res;
     private static byte[] buf;
 
     public static void main(String[] args) throws IOException {
-
+        buf = new byte[256];
         port = Integer.parseInt(args[1]);
         host = InetAddress.getByName(args[0]);
 
@@ -44,15 +45,15 @@ public class Client {
     private static void sendRequest(List<String> operation) throws IOException {
 
         processRequest(operation);
-        packet = new DatagramPacket(buf, buf.length, host, port);
-        socket.send(packet);
+        packet_req = new DatagramPacket(buf,buf.length, host, port);
+        socket.send(packet_req);
     }
 
     private static void processReply(List<String> operation) throws IOException {
-
-        socket.receive(packet);
-        buf = packet.getData();
-        String[] result = new String(buf,0,packet.getLength()).split(" ");
+        packet_res = new DatagramPacket(buf,buf.length);
+        socket.receive(packet_res);
+        buf = packet_res.getData();
+        String[] result = new String(buf,0,packet_res.getLength()).split(" ");
         System.out.print("Client:");
 
         for(String op: operation)
@@ -60,7 +61,7 @@ public class Client {
             System.out.print(" " +op);
         }
 
-        System.out.print(":" );
+        System.out.print(" :" );
 
         for(String r: result) {
             System.out.print(" " + r);

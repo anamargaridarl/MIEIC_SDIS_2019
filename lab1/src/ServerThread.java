@@ -20,11 +20,12 @@ public class ServerThread {
     }
 
     void start() throws IOException {
-        byte[] buf = new byte[256];
 
         while(true) {
+            byte[] buf = new byte[256];
             packet_req = new DatagramPacket(buf, buf.length);
             socket.receive(packet_req);
+            buf = new byte[256];
             buf = processPacket(packet_req).getBytes();
             reply(buf);
         }
@@ -77,7 +78,7 @@ public class ServerThread {
         String response;
 
         if(dns_db.containsKey(dns)) {
-            response = dns + dns_db.get(dns);
+            response = dns + " " + dns_db.get(dns);
         }
         else
             throw new NoAddress();
