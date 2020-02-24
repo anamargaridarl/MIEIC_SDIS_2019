@@ -20,28 +20,18 @@ public class ServerThread {
     }
 
     void start() throws IOException {
-        byte[] request;
-        byte[] response;
+        byte[] buf = new byte[256];
 
         while(true) {
-            request = new byte[256];
-            packet_req = new DatagramPacket(request, request.length);
+            packet_req = new DatagramPacket(buf, buf.length);
             socket.receive(packet_req);
-            response = processPacket(packet_req).getBytes();
-            reply(response);
+            buf = processPacket(packet_req).getBytes();
+            reply(buf);
         }
-
-    }
-
-    private void reply(byte[] response) throws IOException {
-        packet_res = new DatagramPacket(response,response.length,InetAddress.getByName("localhost"),serverPort);
-        socket.send(packet_res);
     }
 
     private String processPacket(DatagramPacket packet) {
-        byte[] data = packet.getData();
-        String[] args = new String(data,data.length).split(" ");
-
+        String[] args = new String(packet.getData(),0,packet.getLength()).split(" ");
         String response = "-1";
         logRequest(args);
 
@@ -73,7 +63,6 @@ public class ServerThread {
         System.out.print("\n");
     }
 
-
     private int registerAddress(String dns, String ip) throws AlreadyRegistered {
         if(dns_db.containsKey(dns))
             throw new AlreadyRegistered();
@@ -96,4 +85,10 @@ public class ServerThread {
         return response;
 
     }
+
+    private void reply(byte[] response) throws IOException {
+        packet_res = new DatagramPacket(response,response.length,packet_req.getAddress(),packet_req.getPort());
+        socket.send(packet_res);
+    }
+
 }

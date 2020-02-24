@@ -3,6 +3,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.lang.String;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,44 +21,41 @@ public class Client {
 
         socket = new DatagramSocket();
 
-        List<String> operands = Arrays.asList(args[3].split(","));
-        sendRequest(args[2],operands);
-        processReply(args[2],operands);
+        List<String> operation = retrieveOperation(args);
+        sendRequest(operation);
+        processReply(operation);
     }
 
+    private static List<String> retrieveOperation(String[] args) {
+        List<String> op = new ArrayList<>();
+        op.addAll(Arrays.asList(args).subList(2, args.length));
+        return op;
+    }
 
-    private static void processRequest(String operation, List<String> operands) {
+    private static void processRequest(List<String> operation) {
 
-        String aux = operation;
-
-        for(String operand: operands)
-        {
-            aux += " " + operand;
+        StringBuilder aux = new StringBuilder();
+        for(String op : operation) {
+            aux.append(op).append(" ");
         }
-
-        buf = aux.getBytes();
-        
+        buf = aux.toString().getBytes();
     }
 
-    private static void sendRequest(String operation, List<String> operands) throws IOException {
+    private static void sendRequest(List<String> operation) throws IOException {
 
-        processRequest(operation,operands);
+        processRequest(operation);
         packet = new DatagramPacket(buf, buf.length, host, port);
         socket.send(packet);
     }
 
-    private static void processReply(String arg, List<String> operands) throws IOException {
-
-        buf =  new byte[256];
+    private static void processReply(List<String> operation) throws IOException {
 
         socket.receive(packet);
-        System.out.print("Received "+ packet);
         buf = packet.getData();
+        String[] result = new String(buf,0,packet.getLength()).split(" ");
+        System.out.print("Client:");
 
-        String[] result = new String(buf,buf.length).split(" ");
-        System.out.print("Client: " + arg );
-
-        for(String op: operands)
+        for(String op: operation)
         {
             System.out.print(" " +op);
         }
@@ -69,9 +67,5 @@ public class Client {
         }
 
         System.out.print("\n");
-
     }
-
-
-
 }
