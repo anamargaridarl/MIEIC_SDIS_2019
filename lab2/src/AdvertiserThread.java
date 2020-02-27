@@ -18,15 +18,15 @@ class AdvertiserThread implements Runnable {
     String advertise;
 
     int server_port;
-    InetAddress server_addr;
+    String server_addr;
 
     AdvertiserThread(String mca, String mcp,String sp) throws IOException {
         mcast_addr = InetAddress.getByName(mca);
         mcast_port = Integer.parseInt(mcp);
         server_port = Integer.parseInt(sp);
         socket = new MulticastSocket(mcast_port);
-        server_addr = InetAddress.getLocalHost();
-        advertise = server_addr.toString() + " " + server_port;
+        server_addr = "127.0.1.1";
+        advertise = server_addr + " " + server_port;
 
         task = new TimerTask() {
             @Override
@@ -37,7 +37,7 @@ class AdvertiserThread implements Runnable {
 
                 try {
                     socket.send(packet);
-                    Logger.logAdvertisement(mcast_addr, mcast_port, server_addr.toString(),Integer.toString(server_port));
+                    Logger.logAdvertisement(mcast_addr, mcast_port, server_addr,Integer.toString(server_port));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -51,7 +51,7 @@ class AdvertiserThread implements Runnable {
     @Override
     public void run() {
         t = new Timer();
-        t.schedule(task,0,1000);
+        t.schedule(task,0,3000);
 
     }
 }

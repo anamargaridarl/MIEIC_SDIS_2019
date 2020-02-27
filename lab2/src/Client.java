@@ -48,6 +48,8 @@ public class Client {
         buf = packet_res.getData();
         String[] result = new String(buf,0,packet_res.getLength()).split(" ");
         Logger.logAdvertisement(mcast_addr, mcast_port,result[0],result[1]);
+        server_addr = InetAddress.getByName(result[0]);
+        server_port = Integer.parseInt(result[1]);
         a_socket.leaveGroup(mcast_addr);
 
     }
@@ -68,7 +70,6 @@ public class Client {
     }
 
     private static void sendRequest(List<String> operation) throws IOException {
-
         processRequest(operation);
         packet_req = new DatagramPacket(buf,buf.length, server_addr, server_port);
         s_socket.send(packet_req);

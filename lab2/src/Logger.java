@@ -4,7 +4,7 @@ import java.util.List;
 public class Logger {
 
     public static void logAdvertisement(InetAddress mcast_addr, int mcast_port, String server_addr, String server_port) {
-        System.out.print("multicast: "+ mcast_addr.toString() + mcast_port + " : " + server_addr + server_port);
+        System.out.println("multicast: "+ mcast_addr.toString() + " " +  mcast_port + " : " + server_addr + " " + server_port);
     }
 
     public static void logReply(List<String> operation, String[] result) {
@@ -14,7 +14,7 @@ public class Logger {
             System.out.print(" " + op);
         }
 
-        System.out.print(" :");
+        System.out.print(" : ");
 
         for (String r : result) {
             System.out.print(" " + r);
