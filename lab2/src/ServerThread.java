@@ -4,7 +4,7 @@ import java.net.DatagramSocket;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ServerThread {
+public class ServerThread implements Runnable {
     DatagramSocket socket;
     Map<String,String> dns_db;
     DatagramPacket packet_res;
@@ -17,22 +17,30 @@ public class ServerThread {
         dns_db = new HashMap<String, String>();
     }
 
-    void start() throws IOException {
+    public void run() {
 
         while(true) {
             byte[] buf = new byte[256];
             packet_req = new DatagramPacket(buf, buf.length);
-            socket.receive(packet_req);
+            try {
+                socket.receive(packet_req);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             buf = new byte[256];
             buf = processPacket(packet_req).getBytes();
-            reply(buf);
+            try {
+                reply(buf);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     private String processPacket(DatagramPacket packet) {
         String[] args = new String(packet.getData(),0,packet.getLength()).split(" ");
         String response = "-1";
-        logRequest(args);
+        Logger.logRequest(args);
 
         if(args[0].equalsIgnoreCase("REGISTER")) {
             try {
@@ -54,15 +62,7 @@ public class ServerThread {
         return response;
     }
 
-    private void logRequest(String[] args) {
-        System.out.print("Server:");
-        for(String arg: args) {
-            System.out.print(" " + arg);
-        }
-        System.out.print("\n");
-    }
-
-    private int registerAddress(String dns, String ip) throws AlreadyRegistered {
+     private int registerAddress(String dns, String ip) throws AlreadyRegistered {
         if(dns_db.containsKey(dns))
             throw new AlreadyRegistered();
         else {

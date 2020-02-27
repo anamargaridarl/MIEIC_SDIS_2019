@@ -2,28 +2,54 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 public class Client {
-    private static int port;
-    private static InetAddress host;
-    private static DatagramSocket socket = null;
+    //Multicast group
+    private static int mcast_port;
+    private static InetAddress mcast_addr;
+    private static MulticastSocket a_socket = null;
+    //Server DNS service
+    private static InetAddress server_addr;
+    private static int server_port;
+    private static DatagramSocket s_socket = null;
     private static DatagramPacket packet_req;
     private static DatagramPacket packet_res;
+
     private static byte[] buf;
 
     public static void main(String[] args) throws IOException {
-        buf = new byte[256];
-        port = Integer.parseInt(args[1]);
-        host = InetAddress.getByName(args[0]);
+        mcast_addr = InetAddress.getByName(args[0]);
+        mcast_port = Integer.parseInt(args[1]);
 
-        socket = new DatagramSocket();
+        s_socket = new DatagramSocket();
+        a_socket = new MulticastSocket(mcast_port);
+
+        retrieveServiceLocation();
 
         List<String> operation = retrieveOperation(args);
         sendRequest(operation);
         processReply(operation);
+    }
+
+    private static void retrieveServiceLocation() throws IOException {
+        a_socket.joinGroup(mcast_addr);
+        buf = new byte[256];
+        packet_res = new DatagramPacket(buf,buf.length);
+        a_socket.receive(packet_res);
+        processAdvertisement();
+
+    }
+
+    private static void processAdvertisement() throws IOException {
+        buf = new byte[256];
+        buf = packet_res.getData();
+        String[] result = new String(buf,0,packet_res.getLength()).split(" ");
+        Logger.logAdvertisement(mcast_addr, mcast_port,result[0],result[1]);
+        a_socket.leaveGroup(mcast_addr);
+
     }
 
     private static List<String> retrieveOperation(String[] args) {
@@ -33,7 +59,7 @@ public class Client {
     }
 
     private static void processRequest(List<String> operation) {
-
+        buf = new byte[256];
         StringBuilder aux = new StringBuilder();
         for(String op : operation) {
             aux.append(op).append(" ");
@@ -44,29 +70,16 @@ public class Client {
     private static void sendRequest(List<String> operation) throws IOException {
 
         processRequest(operation);
-        packet_req = new DatagramPacket(buf,buf.length, host, port);
-        socket.send(packet_req);
+        packet_req = new DatagramPacket(buf,buf.length, server_addr, server_port);
+        s_socket.send(packet_req);
     }
 
     private static void processReply(List<String> operation) throws IOException {
         buf = new byte[256];
         packet_res = new DatagramPacket(buf,buf.length);
-        socket.receive(packet_res);
+        s_socket.receive(packet_res);
         buf = packet_res.getData();
         String[] result = new String(buf,0,packet_res.getLength()).split(" ");
-        System.out.print("Client:");
-
-        for(String op: operation)
-        {
-            System.out.print(" " +op);
-        }
-
-        System.out.print(" :" );
-
-        for(String r: result) {
-            System.out.print(" " + r);
-        }
-
-        System.out.print("\n");
+        Logger.logReply(operation,result);
     }
 }
