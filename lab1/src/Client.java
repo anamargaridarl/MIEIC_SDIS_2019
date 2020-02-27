@@ -50,6 +50,7 @@ public class Client {
     }
 
     private static void processReply(List<String> operation) throws IOException {
+        buf = new byte[256];
         packet_res = new DatagramPacket(buf,buf.length);
         socket.receive(packet_res);
         buf = packet_res.getData();

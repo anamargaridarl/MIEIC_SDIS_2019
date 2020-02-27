@@ -89,6 +89,7 @@ public class ServerThread {
 
     private void reply(byte[] response) throws IOException {
         packet_res = new DatagramPacket(response,response.length,packet_req.getAddress(),packet_req.getPort());
+        System.out.println("Lookup: " + new String(response,0,packet_res.getLength()));
         socket.send(packet_res);
     }
 
