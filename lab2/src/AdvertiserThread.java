@@ -25,7 +25,7 @@ class AdvertiserThread implements Runnable {
         mcast_port = Integer.parseInt(mcp);
         server_port = Integer.parseInt(sp);
         socket = new MulticastSocket(mcast_port);
-        server_addr = "127.0.1.1";
+        server_addr = InetAddress.getLocalHost().getHostAddress();
         advertise = server_addr + " " + server_port;
 
         task = new TimerTask() {
