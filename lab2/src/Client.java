@@ -83,7 +83,7 @@ public class Client {
 
         s_socket.setSoTimeout(10000);
         try {
-            s_socket.receive(packet_req);
+            s_socket.send(packet_req);
         } catch (SocketTimeoutException e) {
             System.out.print("Timeout! Couldn't send request to server \n");
             exit(1);
