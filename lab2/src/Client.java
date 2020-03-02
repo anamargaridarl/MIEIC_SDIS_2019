@@ -1,11 +1,11 @@
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static java.lang.System.exit;
+
 public class Client {
     //Multicast group
     private static int mcast_port;
@@ -38,7 +38,15 @@ public class Client {
         a_socket.joinGroup(mcast_addr);
         buf = new byte[256];
         packet_res = new DatagramPacket(buf,buf.length);
-        a_socket.receive(packet_res);
+
+        a_socket.setSoTimeout(10000);
+        try {
+            a_socket.receive(packet_res);
+        } catch (SocketTimeoutException e) {
+            System.out.print("Timeout retrieving information in multicast channel! \n");
+            exit(1);
+        }
+
         processAdvertisement();
 
     }
@@ -72,13 +80,29 @@ public class Client {
     private static void sendRequest(List<String> operation) throws IOException {
         processRequest(operation);
         packet_req = new DatagramPacket(buf,buf.length, server_addr, server_port);
-        s_socket.send(packet_req);
+
+        s_socket.setSoTimeout(10000);
+        try {
+            s_socket.receive(packet_req);
+        } catch (SocketTimeoutException e) {
+            System.out.print("Timeout! Couldn't send request to server \n");
+            exit(1);
+        }
+
     }
 
     private static void processReply(List<String> operation) throws IOException {
         buf = new byte[256];
         packet_res = new DatagramPacket(buf,buf.length);
-        s_socket.receive(packet_res);
+
+        s_socket.setSoTimeout(5000);
+        try {
+            s_socket.receive(packet_res);
+        } catch (SocketTimeoutException e) {
+            System.out.print("Timeout processing reply \n");
+            exit(1);
+        }
+
         buf = packet_res.getData();
         String[] result = new String(buf,0,packet_res.getLength()).split(" ");
         Logger.logReply(operation,result);
