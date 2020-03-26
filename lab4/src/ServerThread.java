@@ -1,6 +1,11 @@
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,28 +14,33 @@ public class ServerThread {
     Map<String,String> dns_db;
     DatagramPacket packet_res;
     DatagramPacket packet_req;
+    ServerSocket server_socket;
     int serverPort;
 
     ServerThread(String port) throws IOException {
         serverPort = Integer.parseInt(port);
-        socket = new DatagramSocket(serverPort);
+        server_socket = new ServerSocket(serverPort);
         dns_db = new HashMap<String, String>();
     }
 
     void start() throws IOException {
 
         while(true) {
-            byte[] buf = new byte[256];
-            packet_req = new DatagramPacket(buf, buf.length);
-            socket.receive(packet_req);
-            buf = new byte[256];
-            buf = processPacket(packet_req).getBytes();
-            reply(buf);
+            Socket client = server_socket.accept();
+            PrintWriter out = new PrintWriter(client.getOutputStream(),true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            String inputLine, outputLine;
+
+            inputLine = in.readLine();
+            if(inputLine != null){
+                outputLine = processPacket(inputLine);
+                out.println(outputLine);
+            }
         }
     }
 
-    private String processPacket(DatagramPacket packet) {
-        String[] args = new String(packet.getData(),0,packet.getLength()).split(" ");
+    private String processPacket(String request) {
+        String[] args = request.split(" ");
         String response = "-1";
         logRequest(args);
 
@@ -84,11 +94,4 @@ public class ServerThread {
         return response;
 
     }
-
-    private void reply(byte[] response) throws IOException {
-        packet_res = new DatagramPacket(response,response.length,packet_req.getAddress(),packet_req.getPort());
-        System.out.println("Lookup: " + new String(response,0,packet_res.getLength()));
-        socket.send(packet_res);
-    }
-
 }
