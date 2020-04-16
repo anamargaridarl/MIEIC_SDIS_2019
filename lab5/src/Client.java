@@ -1,3 +1,5 @@
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,23 +15,41 @@ public class Client {
     private static InetAddress host;
     private static String request;
     private static String reply;
-    private static Socket socket;
+    private static SSLSocket socket;
+    private static String[] cyphersuits;
 
-    public static void main(String[] args) throws IOException {
+    public void main(String[] args) throws IOException {
         port = Integer.parseInt(args[1]);
         host = InetAddress.getByName(args[0]);
 
-        socket = new Socket(host,port);
+        socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(host,port);
 
         List<String> operation = retrieveOperation(args);
+        retrieveCypherSuits(operation.get(2));
+        authenticateServer();
         sendRequest(operation);
         processReply(operation);
+    }
+
+    private void retrieveCypherSuits(String csuits)
+    {
+        cyphersuits = csuits.split(" ");
     }
 
     private static List<String> retrieveOperation(String[] args) {
         List<String> op = new ArrayList<>();
         op.addAll(Arrays.asList(args).subList(2, args.length));
         return op;
+    }
+
+    private void authenticateServer() throws IOException {
+        PrintWriter out = new PrintWriter(socket.getOutputStream(),true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+        //TODO:process in case of no cyphersuits
+        socket.setEnabledCipherSuites(cyphersuits);
+        //TODO: get cyphersuits chosen by the server
+
     }
 
     private static void processRequest(List<String> operation) {
@@ -74,4 +94,5 @@ public class Client {
             System.out.println("Failed to receive reply from server");
         }
     }
+
 }

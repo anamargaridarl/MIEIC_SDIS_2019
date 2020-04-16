@@ -1,3 +1,6 @@
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,25 +13,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ServerThread {
-    DatagramSocket socket;
-    Map<String, String> dns_db;
-    DatagramPacket packet_res;
-    DatagramPacket packet_req;
-    ServerSocket server_socket;
+    private DatagramSocket socket;
+    private Map<String, String> dns_db;
+    private DatagramPacket packet_res;
+    private DatagramPacket packet_req;
+    private SSLServerSocket server_socket;
     int serverPort;
 
     ServerThread(String port) throws IOException {
         serverPort = Integer.parseInt(port);
-        server_socket = new ServerSocket(serverPort);
+        server_socket = (SSLServerSocket) SSLServerSocketFactory.getDefault().createServerSocket(serverPort);
         dns_db = new HashMap<String, String>();
     }
 
     void start() throws IOException {
 
+
         while(true) {
-            Socket client = server_socket.accept();
-            PrintWriter out = new PrintWriter(client.getOutputStream(),true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            SSLSocket client_socket = (SSLSocket) server_socket.accept();
+            PrintWriter out = new PrintWriter(client_socket.getOutputStream(),true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(client_socket.getInputStream()));
             String inputLine, outputLine;
 
             inputLine = in.readLine();
